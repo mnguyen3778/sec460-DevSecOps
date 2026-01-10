@@ -1,0 +1,62 @@
+Part A:
+
+Statement 1: The CIS Controls v8.1 spreadsheet includes a specific mapping to the "Govern" security function introduced in the NIST Cybersecurity Framework (CSF) 2.0.
+Statement 2: In version 8.1, the spreadsheet and framework added "Documentation" as a new asset type to categorize security plans, policies, and procedures.
+Statement 3: The official CIS Controls spreadsheet uses Implementation Groups (IGs) to help organizations prioritize the 153 Safeguards based on their risk profile and available resources.
+Statement 4: The current v8.1 spreadsheet has increased the total number of top-level Critical Security Controls from 18 back to 20 to account for new AI-driven threats.
+
+
+Statement 4 is the lie
+
+
+Part B:
+
+Password Rules:
+- Minimum length of 12 characters
+- No mandatory complexity requirements
+- Allow passphrases
+- Block known breached passwords
+- Enable multi-factor authentication
+- Allow password managers
+
+
+Part C:
+
+AI A (Cloud-First Expert) Recommendation
+"AI A" recommends a full migration to Azure Virtual Desktop (AVD) for its superior security posture and centralized management, which minimizes endpoint risks. This approach leverages the existing 10 Azure VDs as a proof of concept and aligns with modern Zero Trust principles, moving data off end-user devices.
+Security: Data remains in the cloud, reducing risks of malware infection, device loss/theft, and data breaches on personal computers. Security features like MFA, conditional access, and endpoint protection are robustly integrated.
+Cost: High initial cost for infrastructure, storage, and AVD-specific licenses (if standard M365 licenses don't apply). However, it offers operational efficiency and reduced support overhead in the long term. Costs scale with usage but require careful calculation using the Azure Pricing Calculator.
+Scalability: Highly scalable with resources adjusting dynamically based on demand.
+Speed of Implementation: Requires significant configuration (host pools, application groups, networking), which might be slower than a pure VPN solution for immediate deployment. 
+AI B (Network Infrastructure Expert) Recommendation
+"AI B" recommends rapidly scaling the existing OpenVPN Access Server or implementing a new FortiGate SSL VPN solution. This approach leverages existing on-premises network knowledge and hardware capabilities where possible.
+Security: Uses established, modern VPN protocols (OpenVPN, IKEv2/IPsec) for secure tunneling. Requires strong security practices like mandatory MFA and endpoint protection (FortiClient) to mitigate risks on end-user devices.
+Cost: Lower upfront cost compared to VDI, as it uses existing endpoints. Costs primarily involve server capacity (can be a VM) and client licenses (e.g., OpenVPN Access Server licenses, FortiClient EMS/VPN licenses).
+Scalability: Both OpenVPN Access Server and FortiGate solutions are designed to scale rapidly by adding server capacity or leveraging cloud auto-scaling capabilities.
+Speed of Implementation: Can be deployed quickly, as it relies on simple client software installation on user devices and configuration of the central server/firewall. 
+Expert Recommendation
+For a fast, secure, and cost-effective solution to the immediate pandemic need, I recommend a hybrid approach using both scaled VPN and existing AVDs. This allows for immediate scaling while planning for a robust long-term solution.
+What to Do (Immediate & Quick Scale)
+Rapidly Scale OpenVPN Access Server:
+Acquire sufficient licenses for 500 users for your existing OpenVPN Access Server. This is generally quick and cost-effective for immediate deployment.
+Deploy the client to all 500 users with pre-shared keys or certificates and username/password authentication.
+Crucial Security Step: Immediately implement Multi-Factor Authentication (MFA) for all VPN connections. This is a foundational security best practice.
+Configure the VPN for split-tunneling to reduce the load on your corporate internet link, allowing non-corporate traffic (like Office 365 or general internet browsing) to go directly to the internet.
+Ensure all remote endpoints have up-to-date antivirus/EDR software.
+Utilize Existing Azure VDs: Continue using the 10 Azure VDs for users handling the most sensitive data, where a "data-on-server, not-on-device" model is preferable.
+Decommission Inadequate Systems: Phase out the small Microsoft Remote Access Server to consolidate management.
+Leverage FortiGate: While you lack VPN licenses for the FortiGate, use it for its other security features like advanced threat protection and firewall policies for the internal resources once the VPN tunnel terminates there. 
+Estimated Costs
+OpenVPN Access Server Licensing: OpenVPN Access Server is a cost-effective solution. Per-user licenses are typically a recurring annual cost (e.g., around $5-$10 per user per month, depending on volume and agreement, though exact pricing varies). For 500 users, this is approximately $2,500 - $5,000 annually for the server licenses, plus the cost of a suitable VM to run the service.
+FortiGate Licenses: If you chose to go the Fortinet route, you would need FortiClient VPN licenses and likely FortiToken licenses for MFA. The cost of adding 500 seats would be significant and potentially take longer to procure than OpenVPN licenses in a crisis.
+Azure VDI: Costs depend on compute, storage, and usage hours, typically estimated using the Azure calculator. It is more expensive per user than a standard VPN connection.
+Total Initial Cost: Focus on the OpenVPN route for immediate needs: minimal extra hardware costs (use existing server or cloud VM), primarily licensing fees, with total costs likely in the low thousands of dollars for initial setup and first year of operation. 
+Risks of the Solution
+Endpoint Security: The primary risk is the security of the employees' home computers. VPNs create a secure tunnel, but if the local device has malware, the internal network can still be compromised.
+Bandwidth Bottleneck: The on-premises internet connection might become a bottleneck with 500 concurrent VPN users, even with split-tunneling. You may need to work with your ISP to temporarily increase bandwidth.
+Support Overhead: Supporting 500 remote users and their varied home network setups increases IT support calls and troubleshooting complexity. 
+Long-Term Solution
+The long-term solution is a transition to a Zero Trust Network Architecture (ZTNA) or a SASE (Secure Access Service Edge) model, which is the modern standard in 2026. This shifts focus away from traditional VPNs that grant broad network access to solutions that provide secure, application-specific access based on user identity and device health, regardless of location. 
+Implement ZTNA: Solutions like FortiSASE, Cisco Secure Access, or integrated cloud-native solutions (e.g., with Azure Conditional Access/Identity Proxy) provide more granular control and a reduced attack surface than traditional VPNs.
+Expand Azure VDI: Gradually migrate more users to Azure Virtual Desktop (AVD) as budget allows and business needs dictate. This offers centralized management and a consistent, secure user experience, which is superior for security in the long run.
+Maintain Hybridity: A mix of ZTNA for general access and VDI for highly sensitive work provides both flexibility and strong security. 
