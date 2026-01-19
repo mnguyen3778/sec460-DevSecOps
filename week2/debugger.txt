@@ -1,0 +1,15 @@
+Step 7:
+len(results) = 4
+
+Step 10:
+152.157.64.5 {osmatch, ports, hostname, macaddress, state}
+runtime {...}
+stats {...}
+task_results [...]
+
+Step 15:
+22
+80
+113
+443
+
