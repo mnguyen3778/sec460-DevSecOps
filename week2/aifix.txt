@@ -1,0 +1,1 @@
+This version is basic and minimal: it asks for input once, converts it to an integer, compares it to 10, and prints the result. much shorter and easier to read than compare.py, but less robust for repeated use
