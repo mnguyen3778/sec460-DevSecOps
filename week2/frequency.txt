@@ -1,0 +1,71 @@
+Yes and No are not the only answers. In the intricate and sometimes perplexing realm of security, the straightforward ‘yes’ and ‘no’ answers we’re accustomed to may suddenly seem elusive. It’s a humorous take on the intricacies of security, where the right answer might be 'Well, it depends,' and navigating the security landscape feels a bit like solving a riddle. Welcome to the world where black and white answers are a rare find and shades of gray are supreme. 
+
+The majority of security breaches are caused by human error. Even though you send out reminder emails and try to teach everyone the cybersecurity safety practices, because humans are evolved to trust people, someone will always trust the wrong person causing a breach. It’s like trying to teach a goldfish to play fetch. So, while you keep fighting the good fight against digital chaos, you secretly wish that human error would take a vacation.
+
+Todays tip: MFA enabled? Make sure you have it enabled and not someone else!! In a world where cyberattacks are the uninvited party crashers, MFA is the door policy we can all get behind even if it does involve a lot of training and begging to get people to use it.
+
+Clicking on a phishing link is like taking a stroll through a cyberjungle and stumbling upon a sign that says, “Free treasure ahead!” It’s as if your computer suddenly transformed into an adventurous pirate ship, setting sail on the high seas of the internet. But here’s the catch: instead of buried treasure, you find yourself face-to-face with malware that’s more mischievous than a band of pirate monkeys raiding your digital coconuts.
+
+"Top 10" List of Secure Computing Tips
+Tip #1 - You are a target to hackers
+Don't ever say, "It won't happen to me." We are all at risk and the stakes are high - both for your personal and financial well-being  and for the university's standing and reputation.
+
+Cybersecurity is everyone's responsibility.
+By following the tips below and remaining vigilant, you are doing your part to protect yourself and others.
+Tip #2 - Keep software up-to-date
+Installing software updates for your operating system and programs is critical. Always install the latest security updates for your devices:
+
+Turn on Automatic Updates for your operating system.
+Use web browsers such as Chrome or Firefox that receive frequent, automatic security updates.
+Make sure to keep browser plug-ins (Flash, Java, etc.) up-to-date.
+Tip #3 - Avoid Phishing scams - beware of suspicious emails and phone calls
+Phishing scams are a constant threat - using various social engineering(link is external) ploys, cyber-criminals will attempt to trick you into divulging personal information such as your login ID and password, banking or credit card information.
+
+Phishing scams can be carried out by phone, text, or through social networking sites - but most commonly by email.
+Be suspicious of any official-looking email message or phone call that asks for personal or financial information.
+Check out our Phishing Resources section for details about identifying phishing scams and protecting yourself.
+
+Tip #4 - Practice good password management
+We all have too many passwords to manage - and it's easy to take short-cuts, like reusing the same password.  A password manager can help you to maintain strong unique passwords for all of your accounts.  These programs can generate strong passwords for you, enter credentials automatically, and remind you to update your passwords periodically. UC Berkeley offers free LastPass Premium(link is external) to all users with a CalNet ID.
+
+Our Protecting Your Credentials how-to article contains detailed recommendations for keeping your password safe.
+
+Tip #5 -  Be careful what you click
+Avoid visiting unknown websites or downloading software from untrusted sources. These sites often host malware that will automatically install (often silently) and compromise your computer.
+
+If attachments or links in the email are unexpected or suspicious for any reason, don't click on it.
+
+ISO recommends using Click-to-Play(link is external) or NoScript(link is external), browser add-on features that prevent the automatic download of plug-in content (e.g., Java, Flash) and scripts that can harbor malicious code.
+
+Tip #6 - Never leave devices unattended
+The physical security of your devices is just as important as their technical security.
+
+If you need to leave your laptop, phone, or tablet for any length of time - lock the screen and physically lock it up so no one else can use it.
+If you keep protected data on a flash drive or external hard drive, make sure they're encrypted and locked up as well.
+For desktop and laptop computers, lock the screen or shut-down the system when not in use.
+Tip #7 - Safeguard Protected Data
+Be aware of Protected Data that you come into contact with and its associated restrictions. Review the UCB Data Classification Standard for examples of types of data in each classification level. In general:
+
+Keep high-level (P4) Protected Data (e.g., SSN's, credit card information, financial aid information, health information, etc.) off of your workstation, laptop, and mobile devices.
+Securely remove sensitive data files from your system when they are no longer needed.
+Always use encryption when storing or transmitting sensitive data.
+Unsure of how to store or handle sensitive data?  Email us at security@berkeley.edu(link sends e-mail).
+
+Tip #8 - Use mobile devices safely
+Considering how much we rely on our mobile devices and how susceptible they are to attack, you'll want to make sure you are protected:
+
+Lock your device with a PIN or password - and never leave it unprotected in public.
+Only install apps from trusted sources (Apple AppStore, Google Play).
+Keep the device's operating system up-to-date.
+Don't click on links or attachments from unsolicited emails or texts.
+Avoid transmitting or storing personal information on the device.
+Most handheld devices are capable of employing data encryption - consult your device's documentation for available options.
+Use Apple's Find my iPhone(link is external) or the Android Device Manager(link is external) tools to help prevent loss or theft.
+Tip #9 - Install antivirus/anti-malware protection
+Only install these programs from a known and trusted source. Keep virus definitions, engines and software up-to-date to ensure your programs remains effective.
+
+See our Minimum Security Standards Anti-Malware Software Guidelines for more information
+
+Tip #10 - Back up your data
+Back up regularly - if you are a victim of a security incident, the only guaranteed way to repair your computer is to erase and re-install the system.
+

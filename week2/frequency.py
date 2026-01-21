@@ -4,9 +4,14 @@ import sys
 VOWELS = set("aeiou")
 
 def usage():
+    """Print usage instructions for the frequency script."""
     print("Usage: ./frequency.py <filename>")
 
 def count_letters(filename):
+    """
+    Read the given file and count occurrences of each alphabetic character.
+    Letters are treated case-sensitive and stored in a dictionary.
+    """
     counts = {}
 
     try:
@@ -22,6 +27,10 @@ def count_letters(filename):
     return counts
 
 def main():
+    """
+    Validate command-line arguments, process the input file,
+    and print letter frequencies one per line.
+    """
     if len(sys.argv) != 2:
         usage()
         return
@@ -36,4 +45,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
