@@ -1,0 +1,60 @@
+1.  wsl -l -v
+  NAME      STATE           VERSION
+* Ubuntu    Stopped         1
+
+
+2. wsl uname -a
+Linux EC2AMAZ-69RMGIS 4.4.0-26100-Microsoft #7309-Microsoft Fri Jan 01 08:00:00 PST 2016 x86_64 x86_64 x86_64 GNU/Linux
+
+
+3. wsl lsb release -a
+/bin/bash: line 1: lsb: command not found
+
+
+4. wsl ls /mnt/c
+'$Recycle.Bin'                     DumpStack.log.tmp  'Program Files (x86)'  'System Volume Information'   inetpub
+'$WINRE_BACKUP_PARTITION.MARKER'   PerfLogs            ProgramData            Users                        pagefile.sys
+'Documents and Settings'          'Program Files'      Recovery
+
+
+5. 5. Windows permissions that do not map to WSL
+
+Running: wsl ls -l /mnt/c
+
+Files with unknown ownership or denied access include:
+- /mnt/c/DumpStack.log.tmp (Permission denied)
+- /mnt/c/pagefile.sys (Permission denied)
+
+
+6.  ls -l testfile.txt.txt
+-rwxrwxrwx 1 mikenguyen mikenguyen 0 Jan 27 00:08 testfile.txt.txt
+
+
+7.1) ls -l testfile.txt.txt
+
+7.2) -r-xr-xr-x 1 mikenguyen mikenguyen 0 Jan 27 00:08 testfile.txt.txt
+7.3) full control, modify, read, write, execute
+
+8. The results are different because PowerShell (Get-ChildItem) uses the Windows filesystem and Windows object model, while WSL ls uses Linux filesystem semantics. Some Windows files, links, and metadata are interpreted differently by Linux, so WSL may not count the same items as PowerShell, which causes the directory listing counts to differ.
+
+
+9. cut -d: -f 4 StorGroupPolicy.log | sort | uniq -c
+   
+     12 Policy for other GUID is not enabled, status
+     
+
+
+10.# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+
+
+
