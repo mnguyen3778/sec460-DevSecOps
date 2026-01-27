@@ -41,12 +41,36 @@ def output_screen(data):
 def output_csv(data):
     """
     Writes server information to a CSV file named serverinfo.csv.
+    One row per server, one column per attribute.
     """
     with open("serverinfo.csv", "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["Key", "Value"])
-        for key, value in data.items():
-            writer.writerow([key, value])
+
+        # header (MUST match dictionary keys exactly)
+        writer.writerow([
+            "Hostname",
+            "CPU (count)",
+            "RAM (GB)",
+            "OSType",
+            "OSVersion",
+            "OS disk size (GB)",
+            "OS disk free (GB)",
+            "Primary IP",
+            "Primary Mac"
+        ])
+
+        # single server row
+        writer.writerow([
+            data["Hostname"],
+            data["CPU (count)"],
+            data["RAM (GB)"],
+            data["OSType"],
+            data["OSVersion"],
+            data["OS disk size (GB)"],
+            data["OS disk free (GB)"],
+            data["Primary IP"],
+            data["Primary Mac"]
+        ])
 
 
 def output_json(data):
