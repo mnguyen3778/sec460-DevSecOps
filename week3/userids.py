@@ -1,57 +1,53 @@
 #!/usr/bin/env python3
+
 import csv
+import sys
 
 
-def read_users(filename):
+def read_users(input_file):
     """
-    Reads a CSV file containing firstname, lastname records.
+    Reads users from a CSV file containing firstname, lastname.
 
     Args:
-        filename (str): Path to the input CSV file.
+        input_file (str): Path to users.csv
 
     Returns:
-        list: A list of (firstname, lastname) tuples.
+        list: List of (firstname, lastname) tuples
     """
     users = []
-    with open(filename, newline="") as f:
+    with open(input_file, newline="") as f:
         reader = csv.reader(f)
         for row in reader:
-            if len(row) >= 2:
-                users.append((row[0].strip(), row[1].strip()))
+            if len(row) != 2:
+                continue
+            users.append((row[0], row[1]))
     return users
 
 
 def build_base_userid(firstname, lastname):
     """
-    Builds the base userid using:
-    first up to 5 letters of the lastname +
-    first up to 3 letters of the firstname.
-
-    All characters are lowercase.
+    Builds the base userid using first initial + up to 7 chars of last name.
 
     Args:
-        firstname (str): User's first name.
-        lastname (str): User's last name.
+        firstname (str)
+        lastname (str)
 
     Returns:
-        str: Base userid without the numeric suffix.
+        str: Base userid
     """
-    return (lastname[:5] + firstname[:3]).lower()
+    return (firstname[0] + lastname[:7]).lower()
 
 
 def generate_userid(base_id, counter_dict):
     """
     Appends a two-digit number to the base userid.
 
-    Uses a dictionary to track how many times the base
-    userid has already been used.
-
     Args:
-        base_id (str): Base userid (first 8 characters).
-        counter_dict (dict): Dictionary tracking counts.
+        base_id (str)
+        counter_dict (dict)
 
     Returns:
-        str: Final userid with numeric suffix.
+        str: Final userid
     """
     count = counter_dict.get(base_id, 0)
     counter_dict[base_id] = count + 1
@@ -60,37 +56,42 @@ def generate_userid(base_id, counter_dict):
 
 def write_userids(input_file, output_file):
     """
-    Reads users from the input CSV file and writes
-    firstname, lastname, userid to the output CSV file.
+    Reads users from input CSV and writes firstname, lastname, userid
+    to the output CSV file.
 
     Args:
-        input_file (str): Path to users.csv.
-        output_file (str): Path to userids.csv.
+        input_file (str)
+        output_file (str)
     """
     users = read_users(input_file)
     counters = {}
 
     with open(output_file, "w", newline="") as f:
-    writer = csv.writer(f)
+        writer = csv.writer(f)
 
-    # write header row (required)
-    writer.writerow(["firstname", "lastname", "userid"])
+        # header row
+        writer.writerow(["firstname", "lastname", "userid"])
 
-    # write data rows
-    for firstname, lastname in users:
-        base_id = build_base_userid(firstname, lastname)
-        userid = generate_userid(base_id, counters)
-        writer.writerow([firstname, lastname, userid])
-
+        # data rows
+        for firstname, lastname in users:
+            base_id = build_base_userid(firstname, lastname)
+            userid = generate_userid(base_id, counters)
+            writer.writerow([firstname, lastname, userid])
 
 
 def main():
     """
-    Main program execution.
+    Command-line entry point.
     """
-    write_userids("users.csv", "userids.csv")
+    if len(sys.argv) != 2:
+        print("Usage: ./userids.py users.csv")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    output_file = "userids.csv"
+
+    write_userids(input_file, output_file)
 
 
 if __name__ == "__main__":
     main()
-
