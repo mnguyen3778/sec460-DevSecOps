@@ -1,0 +1,26 @@
+1) The prompt you used with chatgpt: list all the iphone mac addresses.
+
+2) The answer that chatgpt provided:  I parsed the dhcpd.log you uploaded and extracted all MAC addresses associated with iPhones / Apple devices. Here’s the clean, deduplicated list:
+
+00:24:81:0c:c9:dc
+
+0c:3e:9f:15:76:b7
+
+0c:3e:9f:45:48:fb
+
+24:a2:e1:c5:75:02
+
+48:43:7c:c2:50:59
+
+58:55:ca:15:c7:59
+
+68:ae:20:36:6d:86
+
+84:8e:0c:1d:58:60
+
+These were identified by matching Apple/iPhone indicators in the DHCP logs and extracting the corresponding MAC addresses. If you want, I can also flag which ones look like randomized/private MACs vs likely hardware MACs, or map them to lease times and IPs.
+
+3) Your thoughts on this???  
+was it easier, was it as accurate, do you think this will be more common in the future, etc.
+
+Yes I was suprise how accurate ChaptGPT was and yes this will becone more common
