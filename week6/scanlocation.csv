@@ -1,0 +1,11 @@
+DNS,IP,Country,RegionName,City,Zipcode,ISP
+alerts.bellevuecollege.edu,168.156.40.112,United States,Washington,Bellevue,98007,Washington State Board Community & Technical Colleges
+news.bellevuecollege.edu,134.39.81.31,United States,Washington,Longview,98632,Washington State Board Community & Technical Colleges
+vpn.bellevuecollege.edu,192.64.1.250,United States,Washington,Tacoma,98409,Washington State Board Community & Technical Colleges
+webftp.bellevuecollege.edu,134.39.81.57,United States,Washington,Longview,98632,Washington State Board Community & Technical Colleges
+owa.bellevuecollege.edu,134.39.81.247,United States,Washington,Longview,98632,Washington State Board Community & Technical Colleges
+mail.bellevuecollege.edu,168.156.35.72,United States,Washington,Bellevue,98007,Washington State Board Community & Technical Colleges
+www.bellevuecollege.edu,162.159.135.42,Canada,Ontario,Toronto,M5A,"Cloudflare, Inc."
+www2.bellevuecollege.edu,104.20.20.214,Canada,Ontario,Toronto,M5A,"Cloudflare, Inc."
+www2.bellevuecollege.edu,172.66.173.2,Canada,Ontario,Toronto,M5A,"Cloudflare, Inc."
+dev.bellevuecollege.edu,134.39.81.206,United States,Washington,Longview,98632,Washington State Board Community & Technical Colleges
