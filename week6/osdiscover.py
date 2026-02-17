@@ -1,69 +1,85 @@
 #!/usr/bin/env python3
+"""
+osdiscover.py
+
+Week 6 Assignment – OS Discovery using python3-nmap
+
+This script reads a CSV file generated from scannet.py that contains
+IP addresses and open ports. It performs OS detection using the
+nmap_os_detection capability of python3-nmap and writes the results
+to a new CSV file including the best OS guess.
+
+Usage:
+    sudo ./osdiscover.py scannet.csv osdiscover.csv
+
+Note:
+    This script must be run with sudo because OS detection requires
+    raw socket access.
+"""
 
 import sys
 import csv
-import nmap3
+import nmap
 
-def get_best_os(os_results):
+
+def detect_os(ip):
     """
-    Takes list returned from nmap_os_detection()
-    Returns best guess OS string
+    Perform OS detection on a single IP address.
+
+    Parameters:
+        ip (str): The IP address to scan.
+
+    Returns:
+        str: The best guess of the operating system, or "Unknown"
+             if no OS match is found.
     """
-    if not isinstance(os_results, list) or len(os_results) == 0:
+    nm = nmap.PortScanner()
+
+    try:
+        nm.scan(ip, arguments='-O')
+    except Exception:
         return "Unknown"
 
-    best_guess = None
-    highest_accuracy = -1
+    if 'osmatch' in nm[ip] and len(nm[ip]['osmatch']) > 0:
+        return nm[ip]['osmatch'][0]['name']
 
-    for entry in os_results:
-        try:
-            accuracy = int(entry.get("accuracy", 0))
-            name = entry.get("name", "Unknown")
-
-            if accuracy > highest_accuracy:
-                highest_accuracy = accuracy
-                best_guess = name
-        except:
-            continue
-
-    return best_guess if best_guess else "Unknown"
+    return "Unknown"
 
 
 def main():
+    """
+    Main execution function.
+
+    Reads input CSV containing IP and open ports.
+    Performs OS detection on each IP.
+    Writes results to output CSV with columns:
+        IP, Open Ports, OS
+    """
     if len(sys.argv) != 3:
-        print("Usage: sudo ./osdiscover.py input.csv output.csv")
+        print("Usage: sudo ./osdiscover.py <input.csv> <output.csv>")
         sys.exit(1)
 
     input_file = sys.argv[1]
     output_file = sys.argv[2]
 
-    nmap = nmap3.Nmap()
-
-    with open(input_file, newline="") as infile, \
-         open(output_file, "w", newline="") as outfile:
-
+    with open(input_file, 'r') as infile, open(output_file, 'w', newline='') as outfile:
         reader = csv.reader(infile)
         writer = csv.writer(outfile)
 
-        header = next(reader)  # Skip header
+        # Write header
         writer.writerow(["IP", "Open Ports", "OS"])
 
-        for row in reader:
-            if len(row) < 2:
-                continue
+        next(reader)  # Skip header from scannet.csv
 
+        for row in reader:
             ip = row[0]
-            ports = row[1]
+            open_ports = row[1]
 
             print(f"Detecting OS for {ip}...")
 
-            try:
-                result = nmap.nmap_os_detection(ip)
-                best_os = get_best_os(result)
-            except:
-                best_os = "ScanError"
+            os_guess = detect_os(ip)
 
-            writer.writerow([ip, ports, best_os])
+            writer.writerow([ip, open_ports, os_guess])
 
     print(f"Scan complete. Results written to {output_file}")
 
