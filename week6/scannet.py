@@ -1,52 +1,88 @@
 #!/usr/bin/env python3
+"""
+scannet.py
+
+Performs a SYN scan against a target network using python3-nmap.
+Outputs a CSV file containing each discovered IP address and its open ports.
+
+Usage:
+    ./scannet.py <network_range> <output_csv>
+
+Example:
+    ./scannet.py 134.39.81.0/24 scannet.csv
+
+Do NOT run this script as root unless required by your environment.
+"""
 
 import sys
 import csv
-import nmap3
+import nmap
 
-def main():
 
-    if len(sys.argv) != 3:
-        print("Usage: ./scannet.py <subnet> <outputfile>")
-        sys.exit(1)
+def syn_scan(network_range):
+    """
+    Perform a SYN scan against the provided network range.
 
-    subnet = sys.argv[1]
-    outfile = sys.argv[2]
+    Args:
+        network_range (str): Network in CIDR notation (e.g., 134.39.81.0/24)
 
-    print(f"Starting SYN scan on {subnet} (this may take several minutes)...")
+    Returns:
+        dict: Dictionary keyed by IP address containing open TCP ports
+    """
+    nm = nmap.PortScanner()
 
-    scanner = nmap3.NmapScanTechniques()
+    print(f"Scanning network {network_range} with SYN scan...")
 
-    # SYN scan
-    results = scanner.nmap_syn_scan(subnet)
+    nm.scan(hosts=network_range, arguments='-sS')
 
-    with open(outfile, "w", newline="") as csvfile:
-        writer = csv.writer(csvfile)
+    results = {}
+
+    for host in nm.all_hosts():
+        open_ports = []
+
+        if 'tcp' in nm[host]:
+            for port in nm[host]['tcp']:
+                if nm[host]['tcp'][port]['state'] == 'open':
+                    open_ports.append(str(port))
+
+        results[host] = " ".join(open_ports)
+
+    return results
+
+
+def write_csv(results, output_file):
+    """
+    Write scan results to a CSV file.
+
+    Args:
+        results (dict): Dictionary of IP addresses and open ports
+        output_file (str): Name of CSV file to write
+    """
+    with open(output_file, mode='w', newline='') as file:
+        writer = csv.writer(file)
         writer.writerow(["IP", "Open Ports"])
 
-        # python3-nmap returns dict keyed by IP
-        for host in results:
+        for ip, ports in results.items():
+            writer.writerow([ip, ports])
 
-            # Skip metadata entries
-            if host == "stats":
-                continue
+    print(f"Scan complete. Results written to {output_file}")
 
-            open_ports = []
 
-            host_data = results.get(host, {})
+def main():
+    """
+    Main entry point for the script.
+    Validates arguments, runs scan, and writes output.
+    """
+    if len(sys.argv) != 3:
+        print("Usage: ./scannet.py <network_range> <output_csv>")
+        sys.exit(1)
 
-            if isinstance(host_data, dict):
+    network_range = sys.argv[1]
+    output_file = sys.argv[2]
 
-                ports = host_data.get("ports", [])
+    results = syn_scan(network_range)
+    write_csv(results, output_file)
 
-                for port in ports:
-                    if port.get("state") == "open":
-                        open_ports.append(str(port.get("portid")))
-
-            if open_ports:
-                writer.writerow([host, " ".join(open_ports)])
-
-    print(f"Scan complete. Results written to {outfile}")
 
 if __name__ == "__main__":
     main()
