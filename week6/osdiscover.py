@@ -2,84 +2,85 @@
 """
 osdiscover.py
 
-Week 6 Assignment – OS Discovery using python3-nmap
+Performs OS detection on hosts listed in an input CSV file
+using the nmap3 library.
 
-This script reads a CSV file generated from scannet.py that contains
-IP addresses and open ports. It performs OS detection using the
-nmap_os_detection capability of python3-nmap and writes the results
-to a new CSV file including the best OS guess.
+Reads a CSV file containing IP addresses (one per line or in first column)
+and outputs a CSV file with detected OS information.
 
 Usage:
-    sudo ./osdiscover.py scannet.csv osdiscover.csv
+    ./osdiscover.py <input_csv> <output_csv>
 
-Note:
-    This script must be run with sudo because OS detection requires
-    raw socket access.
+Example:
+    ./osdiscover.py scannet.csv osdiscover.csv
 """
 
 import sys
 import csv
-import nmap
+import nmap3
 
 
-def detect_os(ip):
+def detect_os(ip_address):
     """
     Perform OS detection on a single IP address.
 
-    Parameters:
-        ip (str): The IP address to scan.
+    Args:
+        ip_address (str): Target IPv4 address.
 
     Returns:
-        str: The best guess of the operating system, or "Unknown"
-             if no OS match is found.
+        str: Best guess OS name or "Unknown"
     """
-    nm = nmap.PortScanner()
+    nmap = nmap3.Nmap()
 
     try:
-        nm.scan(ip, arguments='-O')
-    except Exception:
+        result = nmap.nmap_os_detection(ip_address)
+
+        if ip_address in result and "osmatch" in result[ip_address]:
+            matches = result[ip_address]["osmatch"]
+            if matches:
+                return matches[0]["name"]
+
         return "Unknown"
 
-    if 'osmatch' in nm[ip] and len(nm[ip]['osmatch']) > 0:
-        return nm[ip]['osmatch'][0]['name']
-
-    return "Unknown"
+    except Exception:
+        return "Unknown"
 
 
 def main():
     """
-    Main execution function.
-
-    Reads input CSV containing IP and open ports.
-    Performs OS detection on each IP.
-    Writes results to output CSV with columns:
-        IP, Open Ports, OS
+    Main function:
+    - Validates arguments
+    - Reads input CSV
+    - Runs OS detection
+    - Writes output CSV
     """
     if len(sys.argv) != 3:
-        print("Usage: sudo ./osdiscover.py <input.csv> <output.csv>")
+        print("Usage: ./osdiscover.py <input_csv> <output_csv>")
         sys.exit(1)
 
     input_file = sys.argv[1]
     output_file = sys.argv[2]
 
-    with open(input_file, 'r') as infile, open(output_file, 'w', newline='') as outfile:
+    with open(input_file, "r") as infile, open(output_file, "w", newline="") as outfile:
         reader = csv.reader(infile)
         writer = csv.writer(outfile)
 
-        # Write header
-        writer.writerow(["IP", "Open Ports", "OS"])
-
-        next(reader)  # Skip header from scannet.csv
+        writer.writerow(["IP", "OS"])
 
         for row in reader:
+            if not row:
+                continue
+
             ip = row[0]
-            open_ports = row[1]
+
+            # Skip header if present
+            if ip.lower() == "ip":
+                continue
 
             print(f"Detecting OS for {ip}...")
+            os_name = detect_os(ip)
 
-            os_guess = detect_os(ip)
-
-            writer.writerow([ip, open_ports, os_guess])
+            writer.writerow([ip, os_name])
 
     print(f"Scan complete. Results written to {output_file}")
 
