@@ -1,77 +1,86 @@
 #!/usr/bin/env python3
+"""
+dump-table.py
 
-# -------------------------------
-# Initial variables and imports
-# -------------------------------
+Connects to an encrypted SQLCipher database and
+outputs the devices table either to the screen,
+a JSON file, or a CSV file.
+
+Usage:
+    dump-table.py screen
+    dump-table.py json output.json
+    dump-table.py csv output.csv
+
+
+"""
 
 import sys
+import sqlcipher3
 import json
 import csv
-import sqlcipher3
 
 database = 'etest.db'
 table = 'devices'
 password = 'MyStrongPassword123'
 
 
-# -------------------------------
-# Main
-# -------------------------------
+def main():
+    """
+    Handles database connection and output formatting.
+    """
 
-def usage():
-    print("Usage:")
-    print("  dump-table.py screen")
-    print("  dump-table.py json <outputfile>")
-    print("  dump-table.py csv <outputfile>")
-    sys.exit(1)
+    if len(sys.argv) < 2:
+        print("Usage: dump-table.py <screen|json|csv> <outputfile>")
+        sys.exit(1)
+
+    mode = sys.argv[1]
+
+    try:
+        db = sqlcipher3.connect(database)
+        cur = db.cursor()
+        cur.execute(f'pragma key="{password}";')
+
+        result = cur.execute(f"SELECT * FROM {table};")
+        rows = result.fetchall()
+
+        headers = [description[0] for description in result.description]
+
+        if mode == "screen":
+            print(headers)
+            for row in rows:
+                print(row)
+
+        elif mode == "json":
+            if len(sys.argv) != 3:
+                print("JSON mode requires output filename.")
+                sys.exit(1)
+
+            output_file = sys.argv[2]
+            data = [dict(zip(headers, row)) for row in rows]
+
+            with open(output_file, "w") as f:
+                json.dump(data, f, indent=4)
+
+        elif mode == "csv":
+            if len(sys.argv) != 3:
+                print("CSV mode requires output filename.")
+                sys.exit(1)
+
+            output_file = sys.argv[2]
+
+            with open(output_file, "w", newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(headers)
+                writer.writerows(rows)
+
+        else:
+            print("Invalid mode. Use screen, json, or csv.")
+
+        db.close()
+
+    except Exception as e:
+        print("Error:", e)
 
 
-if len(sys.argv) < 2:
-    usage()
-
-mode = sys.argv[1]
-
-if mode not in ['screen', 'json', 'csv']:
-    usage()
-
-if mode in ['json', 'csv'] and len(sys.argv) != 3:
-    usage()
-
-outputfile = None
-if len(sys.argv) == 3:
-    outputfile = sys.argv[2]
-
-try:
-    db = sqlcipher3.connect(database)
-    cur = db.cursor()
-    cur.execute(f'pragma key="{password}";')
-
-    result = cur.execute(f"select * from {table};")
-    rows = result.fetchall()
-
-    columns = [description[0] for description in cur.description]
-
-    if mode == 'screen':
-        print(columns)
-        for row in rows:
-            print(row)
-
-    elif mode == 'json':
-        data = []
-        for row in rows:
-            data.append(dict(zip(columns, row)))
-
-        with open(outputfile, 'w') as f:
-            json.dump(data, f, indent=4)
-
-    elif mode == 'csv':
-        with open(outputfile, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(columns)
-            writer.writerows(rows)
-
-    db.close()
-
-except Exception as e:
-    print("Error:", e)
-    sys.exit(1)
+if __name__ == "__main__":
+    main()
