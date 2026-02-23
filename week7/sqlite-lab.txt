@@ -1,0 +1,121 @@
+.archive ...             Manage SQL archives
+.auth ON|OFF             Show authorizer callbacks
+.backup ?DB? FILE        Backup DB (default "main") to FILE
+.bail on|off             Stop after hitting an error.  Default OFF
+.cd DIRECTORY            Change the working directory to DIRECTORY
+.changes on|off          Show number of rows changed by SQL
+.check GLOB              Fail if output since .testcase does not match
+.clone NEWDB             Clone data into NEWDB from the existing database
+.connection [close] [#]  Open or close an auxiliary database connection
+.databases               List names and files of attached databases
+.dbconfig ?op? ?val?     List or change sqlite3_db_config() options
+.dbinfo ?DB?             Show status information about the database
+.dump ?OBJECTS?          Render database content as SQL
+.echo on|off             Turn command echo on or off
+.eqp on|off|full|...     Enable or disable automatic EXPLAIN QUERY PLAN
+.excel                   Display the output of next command in spreadsheet
+.exit ?CODE?             Exit this program with return-code CODE
+.expert                  EXPERIMENTAL. Suggest indexes for queries
+.explain ?on|off|auto?   Change the EXPLAIN formatting mode.  Default: auto
+.filectrl CMD ...        Run various sqlite3_file_control() operations
+.fullschema ?--indent?   Show schema and the content of sqlite_stat tables
+.headers on|off          Turn display of headers on or off
+.help ?-all? ?PATTERN?   Show help text for PATTERN
+.import FILE TABLE       Import data from FILE into TABLE
+.indexes ?TABLE?         Show names of indexes
+.limit ?LIMIT? ?VAL?     Display or change the value of an SQLITE_LIMIT
+.lint OPTIONS            Report potential schema issues.
+.load FILE ?ENTRY?       Load an extension library
+.log FILE|on|off         Turn logging on or off.  FILE can be stderr/stdout
+.mode MODE ?OPTIONS?     Set output mode
+.nonce STRING            Suspend safe mode for one command if nonce matches
+.nullvalue STRING        Use STRING in place of NULL values
+.once ?OPTIONS? ?FILE?   Output for the next SQL command only to FILE
+.open ?OPTIONS? ?FILE?   Close existing database and reopen FILE
+.output ?FILE?           Send output to FILE or stdout if FILE is omitted
+.parameter CMD ...       Manage SQL parameter bindings
+.print STRING...         Print literal STRING
+.progress N              Invoke progress handler after every N opcodes
+.prompt MAIN CONTINUE    Replace the standard prompts
+.quit                    Stop interpreting input stream, exit if primary.
+.read FILE               Read input from FILE or command output
+.recover                 Recover as much data as possible from corrupt db.
+.restore ?DB? FILE       Restore content of DB (default "main") from FILE
+.save ?OPTIONS? FILE     Write database to FILE (an alias for .backup ...)
+.scanstats on|off|est    Turn sqlite3_stmt_scanstatus() metrics on or off
+.schema ?PATTERN?        Show the CREATE statements matching PATTERN
+.separator COL ?ROW?     Change the column and row separators
+.session ?NAME? CMD ...  Create or control sessions
+.sha3sum ...             Compute a SHA3 hash of database content
+.shell CMD ARGS...       Run CMD ARGS... in a system shell
+.show                    Show the current values for various settings
+.stats ?ARG?             Show stats or turn stats on or off
+.system CMD ARGS...      Run CMD ARGS... in a system shell
+.tables ?TABLE?          List names of tables matching LIKE pattern TABLE
+.timeout MS              Try opening locked tables for MS milliseconds
+.timer on|off            Turn SQL timer on or off
+.trace ?OPTIONS?         Output each SQL statement as it is run
+.version                 Show source, library and compiler versions
+.vfsinfo ?AUX?           Information about the top-level VFS
+.vfslist                 List all available VFSes
+.vfsname ?AUX?           Print the name of the VFS stack
+.width NUM1 NUM2 ...     Set minimum column widths for columnar output
+sqlite> .dbconfig
+          defensive on
+            dqs_ddl on
+            dqs_dml on
+        enable_fkey off
+        enable_qpsg off
+     enable_trigger on
+        enable_view on
+     fts3_tokenizer on
+ legacy_alter_table off
+ legacy_file_format off
+     load_extension on
+   no_ckpt_on_close off
+     reset_database off
+  reverse_scanorder off
+    stmt_scanstatus off
+        trigger_eqp off
+     trusted_schema off
+    writable_schema off
+sqlite> .tables
+devices0  devices1
+sqlite> .databases
+main: /home/mike_nguyen/MikeN/week7/test.db r/w
+sqlite> .schema
+CREATE TABLE devices0
+(name,macaddress,ip,cpucount,disks,diskfree,ram,ostype,osversion);
+CREATE TABLE devices1 (
+name text not null,
+macaddress text not null,
+ip text,
+cpucount int,
+disks int,
+diskfree int,
+ram int,
+ostype text,
+osversion text
+);
+sqlite> SELECT * FROM devices1;
+yoda,c8:f6:50:e7:93:ff,192.168.10.21,1,10,8,4,ubuntu,12.04
+neytiri,30:85:a9:57:a9:1d,192.168.10.10,4,250,125,16,windows,2012
+hal,2c:44:fd:02:02:3b,192.168.10.22,1,80,20,2,windows,7
+thufir,5c:96:9d:90:10:b9,192.168.10.11,4,500,50,4,centos,6
+leeloo,00:10:49:1c:25:7f,192.168.10.23,1,500,300,4,windows,7
+>>> import sqlite3
+>>> db = sqlite3.connect('test.db')
+>>> cur = db.cursor()
+>>> result = cur.execute("select * from devices0;")
+>>> result.fetchall()
+[]
+strings etest.db
+(rI!
+x9?;
+x=x^
+>>> result = cur.execute('pragma key="MyStrongPassword123";')
+>>> result.fetchone()
+('ok',)
+>>> result = cur.execute("select * from devices;")
+>>> result.fetchall()
+[('yoda', 'c8:f6:50:e7:93:ff', '192.168.10.21', '1', '10', '8', '4', 'ubuntu', '12.04'), ('neytiri', '30:85:a9:57:a9:1d', '192.168.10.10', '4', '250', '125', '16', 'windows', '2012'), ('hal', '2c:44:fd:02:02:3b', '192.168.10.22', '1', '80', '20', '2', 'windows', '7'), ('thufir', '5c:96:9d:90:10:b9', '192.168.10.11', '4', '500', '50', '4', 'centos', '6'), ('leeloo', '00:10:49:1c:25:7f', '192.168.10.23', '1', '500', '300', '4', 'windows', '7')]
