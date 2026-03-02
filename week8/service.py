@@ -29,6 +29,23 @@ import pinglib
 DB_NAME = "monitor.db"
 
 
+def print_usage():
+    """
+    Print valid commands and usage options.
+    """
+    print("Usage:")
+    print("    ./service.py update <dns_or_ip> <warn_ms>")
+    print("    ./service.py delete <dns_or_ip>")
+    print("    ./service.py list")
+    print("    ./service.py check")
+    print("")
+    print("Commands:")
+    print("    update  - add or update a device and warning threshold")
+    print("    delete  - remove a device from monitoring")
+    print("    list    - list all monitored devices")
+    print("    check   - ping all devices and log results")
+
+
 def init_db():
     """
     Create the devices table if it does not already exist.
@@ -48,10 +65,6 @@ def init_db():
 def update_device(dns_ip, warn):
     """
     Insert or update a device in the database.
-
-    Parameters:
-        dns_ip (str): DNS name or IP address.
-        warn (int): Warning threshold in milliseconds.
     """
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
@@ -68,9 +81,6 @@ def update_device(dns_ip, warn):
 def delete_device(dns_ip):
     """
     Remove a device from the monitoring table.
-
-    Parameters:
-        dns_ip (str): DNS name or IP address to remove.
     """
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
@@ -96,10 +106,6 @@ def list_devices():
 def check_devices():
     """
     Ping all monitored devices and log results to syslog.
-
-    ERROR   – Device unreachable
-    WARNING – Ping time exceeds warning threshold
-    OK      – Ping time within acceptable threshold
     """
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
@@ -112,8 +118,6 @@ def check_devices():
     for dns_ip, warn in rows:
         result = pinglib.pingthis(dns_ip)
 
-        # Your pinglib returns a list like:
-        # [True, ping_time] or [False, None]
         if isinstance(result, list) and len(result) == 2:
             status = result[0]
             ping_time = result[1]
@@ -148,11 +152,11 @@ def main():
     """
     Command dispatcher for monitoring operations.
     """
-    if len(sys.argv) < 2:
-        print("Usage: ./service.py <cmd> <options>")
-        sys.exit(1)
-
     init_db()
+
+    if len(sys.argv) < 2:
+        print_usage()
+        sys.exit(1)
 
     cmd = sys.argv[1]
 
@@ -162,14 +166,15 @@ def main():
     elif cmd == "delete" and len(sys.argv) == 3:
         delete_device(sys.argv[2])
 
-    elif cmd == "list":
+    elif cmd == "list" and len(sys.argv) == 2:
         list_devices()
 
-    elif cmd == "check":
+    elif cmd == "check" and len(sys.argv) == 2:
         check_devices()
 
     else:
-        print("Invalid command")
+        print_usage()
+        sys.exit(1)
 
 
 if __name__ == "__main__":
