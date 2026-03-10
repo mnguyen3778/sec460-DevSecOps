@@ -1,0 +1,10 @@
+---
+- name: Install sysstat on all Linux servers
+  hosts: linux
+  become: true
+
+  tasks:
+    - name: Install sysstat package
+      package:
+        name: sysstat
+        state: present
