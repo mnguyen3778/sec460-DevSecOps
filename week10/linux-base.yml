@@ -1,0 +1,117 @@
+---
+- name: Configure base Linux environment
+  hosts: linux
+  become: yes
+
+  vars:
+    packages:
+      - zip
+      - unzip
+      - nano
+      - python3
+      - sysstat
+      - chrony
+      - vim
+      - rsyslog
+      - nmap
+      - pip
+      - git
+
+  tasks:
+
+  - name: Install required packages (Ubuntu)
+    apt:
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Install required packages (RedHat)
+    yum:
+      name: "{{ packages }}"
+      state: present
+    when: ansible_os_family == "RedHat"
+
+  - name: Install lynis via git
+    git:
+      repo: https://github.com/CISOfy/lynis
+      dest: /opt/lynis
+      clone: yes
+      update: yes
+
+  - name: Install system vimrc
+    copy:
+      src: vimrc
+      dest: /etc/vim/vimrc
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: Install system nanorc
+    copy:
+      src: nanorc
+      dest: /etc/nanorc
+      owner: root
+      group: root
+      mode: '0644'
+
+  - name: Set timezone
+    timezone:
+      name: America/Los_Angeles
+
+  - name: Create localadmin user
+    user:
+      name: localadmin
+      shell: /bin/bash
+      create_home: yes
+
+  - name: Add user to sudo group (linux1)
+    user:
+      name: localadmin
+      groups: sudo
+      append: yes
+    when: inventory_hostname == "linux1"
+
+  - name: Add user to wheel group (linux2)
+    user:
+      name: localadmin
+      groups: wheel
+      append: yes
+    when: inventory_hostname == "linux2"
+
+  - name: Generate SSH key for localadmin
+    openssh_keypair:
+      path: /home/localadmin/.ssh/id_rsa
+      type: rsa
+      size: 2048
+      owner: localadmin
+      group: localadmin
+      mode: '0600'
+
+  - name: Configure rsyslog server on linux1
+    lineinfile:
+      path: /etc/rsyslog.conf
+      line: '$ModLoad imudp'
+    when: inventory_hostname == "linux1"
+
+  - name: Configure rsyslog to send logs to linux1
+    lineinfile:
+      path: /etc/rsyslog.conf
+      line: '*.* @linux1:514'
+    when: inventory_hostname != "linux1"
+
+  - name: Restart rsyslog
+    service:
+      name: rsyslog
+      state: restarted
+
+  - name: Update all packages (Ubuntu)
+    apt:
+      upgrade: dist
+    when: ansible_os_family == "Debian"
+
+  - name: Update all packages (RedHat)
+    yum:
+      name: "*"
+      state: latest
+    when: ansible_os_family == "RedHat"
