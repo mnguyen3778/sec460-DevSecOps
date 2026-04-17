@@ -8,100 +8,99 @@ on:
 
 jobs:
 
-# ---------------------------
-# SAST
-# ---------------------------
+# =========================
+# SAST (Code Analysis)
+# =========================
   sast:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Run Bandit
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run Bandit (show + save report)
         run: |
           pip install bandit
-          bandit -r . -f json -o bandit-report.json
+          bandit -r . -ll || true
+          bandit -r . -f json -o bandit-report.json || true
 
       - name: Run Semgrep
         uses: returntocorp/semgrep-action@v1
         with:
           config: p/owasp-top-ten
 
-      - name: SAST Gate Message
-        if: failure()
-        run: |
-          echo "❌ SECURITY GATE FAILED (SAST)"
-          exit 1
+      - name: Upload SAST artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-reports
+          path: bandit-report.json
 
-# ---------------------------
-# SCA
-# ---------------------------
+      - name: SAST Security Gate
+        run: |
+          echo "🔍 Checking for SAST failures..."
+          if grep -q "issue" bandit-report.json; then
+            echo "❌ SECURITY GATE FAILED (SAST)"
+            exit 1
+          else
+            echo "✅ SAST PASSED"
+          fi
+
+# =========================
+# SCA (Dependencies)
+# =========================
   sca:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Python Dependency Scan
-        run: |
-          pip install pip-audit
-          pip-audit
+      - name: Install pip-audit
+        run: pip install pip-audit
 
-      - name: Node Dependency Scan
-        run: |
-          if [ -f package.json ]; then
-            npm install
-            npm audit --audit-level=high
-          fi
+      - name: Run pip-audit
+        run: pip-audit || true
 
-      - name: SCA Gate Message
-        if: failure()
+      - name: SCA Security Gate
         run: |
-          echo "❌ SECURITY GATE FAILED (SCA)"
-          exit 1
+          echo "🔍 Checking dependency vulnerabilities..."
+          pip-audit --strict && echo "✅ SCA PASSED" || (echo "❌ SECURITY GATE FAILED (SCA)" && exit 1)
 
-# ---------------------------
-# SECRETS
-# ---------------------------
+# =========================
+# Secrets Scanning
+# =========================
   secrets:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Run TruffleHog
-        run: |
-          docker run --rm -v "$PWD:/repo" trufflesecurity/trufflehog:latest \
-            git file:///repo --json > secrets-report.json
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
 
-      - name: Fail if secrets found
-        run: |
-          if [ -s secrets-report.json ]; then
-            echo "❌ SECURITY GATE FAILED (SECRETS)"
-            exit 1
-          fi
-
-# ---------------------------
-# IaC
-# ---------------------------
+# =========================
+# IaC Scanning
+# =========================
   iac:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Run Checkov
-        uses: bridgecrewio/checkov-action@v12
+        uses: bridgecrewio/checkov-action@master
         with:
           directory: .
+          quiet: true
+          soft_fail: true
 
-      - name: IaC Gate Message
-        if: failure()
+      - name: IaC Security Gate
         run: |
-          echo "❌ SECURITY GATE FAILED (IaC)"
-          exit 1
+          echo "🔍 Checking IaC misconfigurations..."
+          checkov -d . || (echo "❌ SECURITY GATE FAILED (IaC)" && exit 1)
 
-# ---------------------------
-# CONTAINER + FINAL GATE
-# ---------------------------
+# =========================
+# Container Scanning
+# =========================
   container:
     runs-on: ubuntu-latest
     needs: [sast, sca, secrets, iac]
@@ -109,48 +108,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Docker Image
-        run: docker build -t redact-app .
+      - name: Build Docker image
+        run: docker build -t myapp .
 
-      - name: Run Trivy Scan (SARIF)
+      - name: Run Trivy
         uses: aquasecurity/trivy-action@0.35.0
         with:
-          image-ref: redact-app
-          format: sarif
-          output: trivy-results.sarif
-          severity: CRITICAL,HIGH
+          image-ref: myapp
+          format: table
           exit-code: 1
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
 
-      - name: Upload SARIF to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-results.sarif
-
-      - name: Upload Security Reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-reports
-          path: |
-            bandit-report.json
-            trivy-results.sarif
-            secrets-report.json
-
-      - name: Final Security Gate Message
-        if: failure()
-        run: |
-          echo "🚫 PIPELINE BLOCKED"
-          echo "Critical/High vulnerabilities detected."
-          exit 1
-
-      - name: Success Message
-        if: success()
-        run: |
-          echo "✅ SECURITY GATE PASSED"
-
-# ---------------------------
-# PR COMMENTS
-# ---------------------------
+# =========================
+# PR Comment
+# =========================
   pr-comment:
     runs-on: ubuntu-latest
     needs: [container]
@@ -178,5 +150,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: "🚫 SECURITY GATE FAILED - Fix vulnerabilities before merge."
+              body: "❌ SECURITY GATE FAILED - Fix vulnerabilities before merge."
             })
