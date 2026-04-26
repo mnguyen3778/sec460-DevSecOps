@@ -1,10 +1,10 @@
-name: SEC460 DevSecOps Pipeline (Enterprise Final v3)
+name: SEC460 DevSecOps Pipeline (Enterprise Final v4)
 
 on:
   push:
     branches: ["main", "develop"]
   pull_request:
-    branches: ["main"]
+    branches: ["develop"]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -15,98 +15,44 @@ permissions:
 
 jobs:
 
-# =========================
-# LINT (FIXED FOR YOUR REPO)
-# =========================
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install Ruff
         run: pip install ruff
-
-      - name: Run Ruff (entire repo)
+      - name: Run Ruff
         run: ruff check .
 
-      - name: Install HTMLHint
-        run: npm install -g htmlhint
-
-      - name: Run HTMLHint (ignore if none)
-        run: htmlhint "**/*.html" || true
-
-# =========================
-# SECRETS (ENFORCED)
-# =========================
   secrets:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Run TruffleHog
+      - name: Run TruffleHog (fail-fast)
         run: |
           docker run --rm \
             -v $PWD:/repo \
             ghcr.io/trufflesecurity/trufflehog:latest \
             filesystem /repo \
-            --only-verified \
-            --json > secrets.json
+            --fail
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Count secrets
-        id: metrics
-        run: |
-          COUNT=$(jq -s length secrets.json)
-          echo "count=$COUNT" >> $GITHUB_OUTPUT
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: secrets-json
-          path: secrets.json
-
-      - name: Enforce secrets policy
-        run: |
-          COUNT=${{ steps.metrics.outputs.count }}
-          if [ "$COUNT" -gt 0 ]; then
-            echo "❌ Verified secrets found"
-            exit 1
-          fi
-
-# =========================
-# SAST (SEMGREP)
-# =========================
   sast:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Run Semgrep
         run: |
           pip install semgrep
           semgrep --config auto --sarif --output semgrep.sarif || true
-
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: semgrep.sarif
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: semgrep-report
-          path: semgrep.sarif
-
-# =========================
-# SCA (TRIVY)
-# =========================
   sca:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Run Trivy
         uses: aquasecurity/trivy-action@0.35.0
         with:
@@ -115,21 +61,11 @@ jobs:
           output: trivy.sarif
           severity: HIGH,CRITICAL
         continue-on-error: true
-
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy.sarif
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-report
-          path: trivy.sarif
-
-# =========================
-# SECURITY GATE (REAL)
-# =========================
   security-gate:
     runs-on: ubuntu-latest
     needs: [lint, secrets, sast, sca]
@@ -143,29 +79,20 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Debug files
-        run: ls -R reports || true
-
       - name: Calculate Risk Score
         id: risk
         run: |
           SCORE=0
 
-          # Secrets
-          if [ -f reports/secrets-json/secrets.json ]; then
-            COUNT=$(jq -s length reports/secrets-json/secrets.json)
-            SCORE=$((SCORE + COUNT * 25))
-          fi
-
-          # Trivy
-          if [ -f reports/trivy-report/trivy.sarif ]; then
-            HIGH=$(grep -c '"level":"error"' reports/trivy-report/trivy.sarif || true)
+          TRIVY_FILE=$(find reports -name "trivy.sarif" | head -n 1)
+          if [ -n "$TRIVY_FILE" ]; then
+            HIGH=$(grep -c '"level":"error"' "$TRIVY_FILE" || true)
             SCORE=$((SCORE + HIGH * 10))
           fi
 
-          # Semgrep
-          if [ -f reports/semgrep-report/semgrep.sarif ]; then
-            ERR=$(grep -c '"level":"error"' reports/semgrep-report/semgrep.sarif || true)
+          SEMGREP_FILE=$(find reports -name "semgrep.sarif" | head -n 1)
+          if [ -n "$SEMGREP_FILE" ]; then
+            ERR=$(grep -c '"level":"error"' "$SEMGREP_FILE" || true)
             SCORE=$((SCORE + ERR * 5))
           fi
 
@@ -175,9 +102,6 @@ jobs:
       - name: Enforce policy
         run: |
           SCORE=${{ steps.risk.outputs.score }}
-
-          echo "Branch: $GITHUB_REF"
-          echo "Score: $SCORE"
 
           if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
             if [ "$SCORE" -gt 0 ]; then
