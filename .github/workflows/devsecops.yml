@@ -1,4 +1,4 @@
-name: SEC460 DevSecOps Pipeline (Enterprise Final v4)
+name: SEC460 DevSecOps Pipeline (Enterprise Final v5)
 
 on:
   push:
@@ -30,21 +30,20 @@ jobs:
         run: ruff check .
 
   # =========================
-  # SECRETS (FIXED)
+  # SECRETS (CORRECT FIX)
   # =========================
   secrets:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run TruffleHog (fail-fast, exclude .git)
+      - name: Run TruffleHog (tracked files only)
         run: |
-          docker run --rm \
+          git ls-files -z | xargs -0 -I {} docker run --rm \
             -v $PWD:/repo \
             ghcr.io/trufflesecurity/trufflehog:latest \
-            filesystem /repo \
-            --fail \
-            --exclude-paths /repo/.git
+            filesystem /repo/{} \
+            --fail
 
   # =========================
   # SAST (SEMGREP)
